@@ -1,0 +1,4 @@
+192.168.50.11 master-1.kubernetes.local master-1
+192.168.50.12 master-2.kubernetes.local master-2
+192.168.50.21 worker-1.kubernetes.local worker-1 192.168.50.0/24
+192.168.50.22 worker-2.kubernetes.local worker-2 192.168.50.0/24
