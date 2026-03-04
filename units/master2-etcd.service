@@ -1,20 +1,26 @@
 [Unit]
-Description=etcd
-Documentation=https://github.com/etcd-io/etcd
+Description=etcd key-value store
+Documentation=https://github.com/coreos/etcd
+After=network.target
 
 [Service]
-Type=notify
 ExecStart=/usr/local/bin/etcd \
-  --name master-2 \
-  --initial-advertise-peer-urls http://192.168.50.12:2380 \
-  --listen-peer-urls http://192.168.50.12:2380 \
-  --listen-client-urls http://192.168.50.12:2379,http://127.0.0.1:2379 \
-  --advertise-client-urls http://192.168.50.12:2379 \
-  --initial-cluster-token etcd-cluster-0 \
-  --initial-cluster master-1=http://192.168.50.11:2380,master-2=http://192.168.50.12:2380 \
+  --name ${HOSTNAME} \
+  --cert-file=/etc/kubernetes/pki/etcd.crt \
+  --key-file=/etc/kubernetes/pki/etcd.key \
+  --peer-cert-file=/etc/kubernetes/pki/etcd.crt \
+  --peer-key-file=/etc/kubernetes/pki/etcd.key \
+  --trusted-ca-file=/etc/kubernetes/pki/ca.crt \
+  --peer-trusted-ca-file=/etc/kubernetes/pki/ca.crt \
+  --initial-advertise-peer-urls https://${HOSTNAME_IP}:2380 \
+  --listen-peer-urls https://${HOSTNAME_IP}:2380 \
+  --listen-client-urls https://${HOSTNAME_IP}:2379,https://127.0.0.1:2379 \
+  --advertise-client-urls https://${HOSTNAME_IP}:2379 \
+  --initial-cluster master-1=https://192.168.50.11:2380,master-2=https://192.168.50.12:2380 \
   --initial-cluster-state new \
   --data-dir=/var/lib/etcd
-Restart=on-failure
+
+Restart=always
 RestartSec=5
 
 [Install]

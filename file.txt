@@ -91,11 +91,16 @@ done
 
 ================================= 7 
 for host in master-1 master-2; do
-scp \
-  downloads/controller/etcd \
-  downloads/client/etcdctl \
-  units/etcd.service \
-    root@${host}:~/
+  # Copier les binaires communs
+  scp downloads/controller/etcd downloads/client/etcdctl \
+      root@${host}:/usr/local/bin/
+
+  # Copier le fichier systemd spécifique à chaque master
+  if [ "$host" = "master-1" ]; then
+    scp units/master1-etcd.service root@${host}:/etc/systemd/system/etcd.service
+  elif [ "$host" = "master-2" ]; then
+    scp units/master2-etcd.service root@${host}:/etc/systemd/system/etcd.service
+  fi
 done
 ------------------------------------------
 
@@ -127,3 +132,27 @@ for host in master-1 master-2; do
 mkdir -p /etc/kubernetes/config /
 root@${host}:~/
 done 
+
+for host in worker-1 worker-2; do
+  kubectl config set-cluster kubernetes-the-hard-way \
+    --certificate-authority=ca.crt \
+    --embed-certs=true \
+    --server=https://server.kubernetes.local:6443 \
+    --kubeconfig=${host}.kubeconfig
+
+  kubectl config set-credentials system:node:${host} \
+    --client-certificate=${host}.crt \
+    --client-key=${host}.key \
+    --embed-certs=true \
+    --kubeconfig=${host}.kubeconfig
+
+  kubectl config set-context default \
+    --cluster=kubernetes-the-hard-way \
+    --user=system:node:${host} \
+    --kubeconfig=${host}.kubeconfig
+
+  kubectl config use-context default \
+    --kubeconfig=${host}.kubeconfig
+done
+
+

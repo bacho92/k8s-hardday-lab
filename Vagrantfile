@@ -37,4 +37,16 @@ Vagrant.configure("2") do |config|
       end
     end
   end
+
+# Load Balancer
+  config.vm.define "lb-node" do |lb|
+    lb.vm.hostname = "lb-node"
+    lb.vm.network "private_network", ip: "192.168.50.100"
+    lb.vm.provider "virtualbox" do |vb|
+      vb.name   = "lb"
+      vb.memory = 1024
+      vb.cpus   = 1
+    end
+  end
 end
+
