@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Kubernetes The Hard Way
 
 This tutorial walks you through setting up Kubernetes the hard way. This guide is not for someone looking for a fully automated tool to bring up a Kubernetes cluster. Kubernetes The Hard Way is optimized for learning, which means taking the long route to ensure you understand each task required to bootstrap a Kubernetes cluster.
@@ -41,3 +42,6 @@ This tutorial requires four (4) ARM64 or AMD64 based virtual or physical machine
 * [Provisioning Pod Network Routes](docs/11-pod-network-routes.md)
 * [Smoke Test](docs/12-smoke-test.md)
 * [Cleaning Up](docs/13-cleanup.md)
+=======
+# k8s-hardday-lab
+>>>>>>> acc6a3b94fb0e38fdffe3bb79170b29eddfbe329

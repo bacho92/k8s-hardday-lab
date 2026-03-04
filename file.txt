@@ -1,0 +1,129 @@
+
+============================================  4 certificat conf
+certs=(
+  "admin" "worker-1" "worker-2"
+  "kube-proxy" "kube-scheduler"
+  "kube-controller-manager"
+  "kube-api-server"
+  "service-accounts"
+)
+--------------------------
+
+for host in worker-1 worker-2; do
+  ssh root@${host} mkdir /var/lib/kubelet/
+
+  scp ca.crt root@${host}:/var/lib/kubelet/
+
+  scp ${host}.crt \
+    root@${host}:/var/lib/kubelet/kubelet.crt
+
+  scp ${host}.key \
+    root@${host}:/var/lib/kubelet/kubelet.key
+done
+
+--------------------------
+
+for host in master-1 master-2; do
+  scp \
+    ca.key ca.crt \
+    kube-api-server.key kube-api-server.crt \
+    service-accounts.key service-accounts.crt \
+    root@${host}:~/
+done
+
+==================================================================== 5 config file
+for host in worker-1 worker-2; do
+  kubectl config set-cluster kubernetes-the-hard-way \
+    --certificate-authority=ca.crt \
+    --embed-certs=true \
+    --server=https://server.kubernetes.local:6443 \
+    --kubeconfig=${host}.kubeconfig
+
+  kubectl config set-credentials system:node:${host} \
+    --client-certificate=${host}.crt \
+    --client-key=${host}.key \
+    --embed-certs=true \
+    --kubeconfig=${host}.kubeconfig
+
+  kubectl config set-context default \
+    --cluster=kubernetes-the-hard-way \
+    --user=system:node:${host} \
+    --kubeconfig=${host}.kubeconfig
+
+  kubectl config use-context default \
+    --kubeconfig=${host}.kubeconfig
+done
+
+-----------------------
+for host in worker-1 worker-2; do
+  ssh root@${host} "mkdir -p /var/lib/{kube-proxy,kubelet}"
+
+  scp kube-proxy.kubeconfig \
+    root@${host}:/var/lib/kube-proxy/kubeconfig \
+
+  scp ${host}.kubeconfig \
+    root@${host}:/var/lib/kubelet/kubeconfig
+done
+----------------------------
+scp admin.kubeconfig \
+  kube-controller-manager.kubeconfig \
+  kube-scheduler.kubeconfig \
+  root@server:~/
+
+
+
+
+  for host in master-1 master-2; do
+  scp \
+  admin.kubeconfig \
+  kube-controller-manager.kubeconfig \
+  kube-scheduler.kubeconfig \
+    root@${host}:~/
+done
+
+---------------------
+
+ for host in master-1 master-2; do
+  scp \
+   encryption-config.yaml \
+    root@${host}:~/
+done
+
+================================= 7 
+for host in master-1 master-2; do
+scp \
+  downloads/controller/etcd \
+  downloads/client/etcdctl \
+  units/etcd.service \
+    root@${host}:~/
+done
+------------------------------------------
+
+for host in master-1 master-2; do
+scp \
+  downloads/controller/kube-apiserver \
+  downloads/controller/kube-controller-manager \
+  downloads/controller/kube-scheduler \
+  downloads/client/kubectl \
+  units/kube-apiserver.service \
+  units/kube-controller-manager.service \
+  units/kube-scheduler.service \
+  configs/kube-scheduler.yaml \
+  configs/kube-apiserver-to-kubelet.yaml \
+root@${host}:~/
+done
+---------------------------------
+for host in master-1 master-2; do 
+scp \
+    kube-apiserver.crt \
+    kube-apiserver.csr \
+    kube-apiserver.key \
+    
+root@${host}:~/
+done 
+
+-----------------
+for host in master-1 master-2; do 
+mkdir -p /etc/kubernetes/config /
+root@${host}:~/
+done 
