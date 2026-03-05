@@ -3,7 +3,7 @@
 
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/jammy64"
-  config.vm.box_version = "20241008.0.0"   # stable 22.04
+  # config.vm.box_version = "20241008.0.0"   # ← supprimé / commenté → Vagrant prend la dernière version disponible
 
   config.vm.provider "virtualbox" do |vb|
     vb.memory = 2048
