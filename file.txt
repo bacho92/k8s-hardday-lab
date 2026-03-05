@@ -156,3 +156,7 @@ for host in worker-1 worker-2; do
 done
 
 
+
+
+chmod +x kubectl kube-apiserver kube-controller-manager kube-scheduler kubelet kube-proxy
+sudo mv kubectl kube-apiserver kube-controller-manager kube-scheduler kubelet kube-proxy /usr/local/bin/
