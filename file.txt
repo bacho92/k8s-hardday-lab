@@ -110,7 +110,6 @@ scp \
   downloads/controller/kube-controller-manager \
   downloads/controller/kube-scheduler \
   downloads/client/kubectl \
-  units/kube-apiserver.service \
   units/kube-controller-manager.service \
   units/kube-scheduler.service \
   configs/kube-scheduler.yaml \
@@ -155,8 +154,35 @@ for host in worker-1 worker-2; do
     --kubeconfig=${host}.kubeconfig
 done
 
+vagrant ssh master-1   # ou ssh vagrant@192.168.50.11 depuis admin/hôte
 
+# Une fois connecté :
+sudo mkdir -p /etc/etcd /var/lib/etcd
+sudo chmod 700 /var/lib/etcd
 
+# Télécharge et installe etcd
+cd ~
+~/kthw/configs/etcd/download-etcd.sh   # ou copie-colle le wget + tar + mv
 
-chmod +x kubectl kube-apiserver kube-controller-manager kube-scheduler kubelet kube-proxy
-sudo mv kubectl kube-apiserver kube-controller-manager kube-scheduler kubelet kube-proxy /usr/local/bin/
+# Copie les certs depuis admin (ou scp depuis admin : scp -r pki/etcd* vagrant@192.168.50.11:~/ )
+# Exemple depuis admin :
+# scp pki/etcd-peer-master-1* pki/ca.pem vagrant@192.168.50.11:~/
+
+sudo cp ~/etcd-peer-master-1.pem /etc/etcd/etcd-peer.pem
+sudo cp ~/etcd-peer-master-1-key.pem /etc/etcd/etcd-peer-key.pem
+sudo cp ~/ca.pem /etc/etcd/ca.pem
+sudo cp ~/kubernetes.pem /etc/etcd/kubernetes.pem     # on générera kubernetes.pem plus tard (étape 08), pour l'instant utilise un placeholder ou attends
+sudo cp ~/kubernetes-key.pem /etc/etcd/kubernetes-key.pem
+
+# Remplace les variables dans etcd.service
+INTERNAL_IP="192.168.50.11"
+ETCD_NAME="master-1"
+
+cat ~/kthw/configs/etcd/etcd.service | \
+  sed "s/\$$   {ETCD_NAME}/   $${ETCD_NAME}/" | \
+  sed "s/\$$   {INTERNAL_IP}/   $${INTERNAL_IP}/" | \
+  sudo tee /etc/systemd/system/etcd.service
+
+sudo systemctl daemon-reload
+sudo systemctl enable etcd
+sudo systemctl start etcd
